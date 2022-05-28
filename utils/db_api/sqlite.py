@@ -38,6 +38,27 @@ class Database:
             );
 """
         self.execute(sql, commit=True)
+    
+    def create_table_films(self):
+        sql = """
+        CREATE TABLE films(
+            name varchar(255) NOT NULL,
+            about TEXT,
+            photo varchar(255),
+            link varchar(255) NOT NULL,
+            PRIMARY KEY (link)
+            );
+"""
+        self.execute(sql, commit=True)
+
+    def create_table_channel(self):
+        sql = """
+        CREATE TABLE channel(
+            link varchar(255) NOT NULL,
+            PRIMARY KEY (link)
+            );
+"""
+        self.execute(sql, commit=True)
 
     @staticmethod
     def format_args(sql, parameters: dict):
@@ -53,6 +74,58 @@ class Database:
         INSERT INTO Users(id, Name, email, language) VALUES(?, ?, ?, ?)
         """
         self.execute(sql, parameters=(id, name, email, language), commit=True)
+
+    def add_film(self, name: str, photo, about: str, link: str):
+        sql = """
+        INSERT INTO films(name, photo, about, link) VALUES(?, ?, ?, ?)
+        """
+        self.execute(sql, parameters=(name, photo, about, link), commit=True)
+
+    def add_channel(self, link: str|int):
+        sql = """
+        INSERT INTO channel(link) VALUES(?)
+        """
+        self.execute(sql, parameters=(link,), commit=True)
+
+    def search_film(self, q):
+        sql = """
+        SELECT * FROM films WHERE name LIKE ? ORDER by name
+        """
+        return self.execute(sql, parameters=(q,), fetchall=True)
+
+    def get_channel(self):
+        sql = """
+        SELECT * FROM channel
+        """
+        return self.execute(sql, fetchall=True)
+
+    def delete_list_film(self, q):
+        sql = """
+        SELECT * FROM films WHERE name LIKE ?
+        """
+        return self.execute(sql, parameters=(q,), fetchall=True)
+
+    def delete_film(self, link):
+        sql = """
+        DELETE FROM films WHERE link=?
+        """
+        self.execute(sql, parameters=(link,), commit=True)
+
+    def delete_channel(self, link):
+        sql = """
+        DELETE FROM channel WHERE link=?
+        """
+        self.execute(sql, parameters=(link,), commit=True)
+
+    def sorted_movie(self):
+        sql = """
+        SELECT * FROM films ORDER BY name
+        """
+        return self.execute(sql, fetchall=True)
+
+    def count_movies(self):
+        return self.execute("SELECT COUNT(*) FROM films;", fetchone=True)
+
 
     def select_all_users(self):
         sql = """
@@ -79,7 +152,7 @@ class Database:
         return self.execute(sql, parameters=(email, id), commit=True)
 
     def delete_users(self):
-        self.execute("DELETE FROM Users WHERE TRUE", commit=True)
+        self.execute("DELETE FROM films WHERE TRUE", commit=True)
 
 
 def logger(statement):
